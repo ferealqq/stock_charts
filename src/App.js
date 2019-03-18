@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { LineChart , YAxis, XAxis, Tooltip,Legend,Line,CartesianGrid,ReferenceLine} from 'recharts';
-import { Input,Button } from 'reactstrap';
+import { Input,Button,Row,Col } from 'reactstrap';
+import { SearchField } from './SearchField';
 import { get } from 'axios';
 import { times,reverse,map } from 'lodash';
 import './App.css';
@@ -130,10 +131,15 @@ class App extends Component {
     this.state = {
       lowest: getLowest("week",data),
       highest: getHighest("week",data),
+      symbol: 'TSLA',
     };
+    this.fetchData = this.fetchData.bind(this);
   }
   componentDidMount(){
-    get("https://www.worldtradingdata.com/api/v1/history?symbol=TSLA&sort=newest&api_token=8JaA8FG34X8VnIqCw3ggb3wXCRWBvSkgC1yWHZy8mDyoDLzqxwQGwGogUwLI")
+    this.fetchData();
+  }
+  fetchData(){
+    get(`https://www.worldtradingdata.com/api/v1/history?symbol=${this.state.symbol}&sort=newest&api_token=8JaA8FG34X8VnIqCw3ggb3wXCRWBvSkgC1yWHZy8mDyoDLzqxwQGwGogUwLI`)
       .then((res)=>{
         let last = getLast('month',res.data.history);
         this.setState({
@@ -141,7 +147,12 @@ class App extends Component {
           lowest: getLowest(last),
           highest: getHighest(last),
         });
-      })
+      })    
+  }
+  selectedStock(stockName){
+    this.setState({
+      symbol: stockName
+    },this.fetchData())
   }
   render() {
     let realData = this.state.data ? this.state.data : data;
@@ -149,15 +160,19 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
+        <SearchField selectedStock={this.selectedStock} />
         <LineChart width={900} height={600} data={reverse(realData)}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
-          <YAxis type="number" domain={[lowest*0.983, highest*1.017]}/>
+          <YAxis type="number" domain={[
+              parseFloat((lowest*0.96).toFixed(2)), 
+              parseFloat((highest*1.04).toFixed(2))]}
+              />
           <Tooltip />
           <Legend wrapperStyle={{fontSize: "1em"}}/>
-          <ReferenceLine x="2019-03-04" y={lowest} stroke="red" label="Low" />
-          <ReferenceLine x="2019-03-04" y={highest} label="Max" stroke="red" /> 
+          <ReferenceLine y={lowest} stroke="red" label="Low" />
+          <ReferenceLine y={highest} label="Max" stroke="red" /> 
           <Line type="monotone" dataKey="low" stroke="#8884d8" />
           <Line type="monotone" dataKey="high" stroke="#82ca9d" />
         </LineChart>          
@@ -166,5 +181,6 @@ class App extends Component {
     );
   }
 }
+
 
 export default App;
