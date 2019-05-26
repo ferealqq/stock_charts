@@ -1,7 +1,13 @@
 import { get } from 'axios';
-
+import { find } from 'lodash';
 export const REQUEST_DATA = "REQUEST_DATA";
 export const RESPONSE_DATA = "RESPONSE_DATA";
+
+export const REQUEST_PERFORMANCE = "REQUEST_PERFORMANCE";
+export const RESPONSE_PERFORMANCE = "RESPONSE_PERFORMANCE";
+
+export const REQUEST_MEDIAN_DATA = "REQUEST_MEDIAN_DATA";
+export const RESPONSE_MEDIAN_DATA = "RESPONSE_MEDIAN_DATA";
 
 const requestData = () => ({
 	type: RESPONSE_DATA
@@ -9,8 +15,7 @@ const requestData = () => ({
 
 const responseData = (data) => ({
 	type: RESPONSE_DATA,
-	data: data.data,
-	median_data: data.median_data,
+	data: data,
 });
 
 function fetchData(){
@@ -19,7 +24,7 @@ function fetchData(){
 
 		get("/api/data")
 		.then((response)=>{
-			dispatch(responseData(response.data));
+			dispatch(responseData(response.data.data));
 		})
 		.catch((err)=>{
 			console.log(err);
@@ -44,4 +49,69 @@ export function fetchDataIfNeeded(){
 			return dispatch(fetchData());
 		}
 	};
+}
+
+const requestPerformance = () => ({
+	type: REQUEST_PERFORMANCE,
+});
+
+const responsePerformance = (data) => ({
+	type: RESPONSE_PERFORMANCE,
+	performance: data.performance,
+	performanceLastUpdated: data.lastUpdated,
+});
+
+function fetchPerformance(){
+	return dispatch=>{
+		dispatch(requestPerformance());
+
+		get("https://api.iextrading.com/1.0/stock/market/sector-performance")
+		.then(response=>{
+			const { data } = response;
+			const foundData = find(data,{ name: "Financials"});
+			dispatch(responsePerformance(foundData));
+		})
+		.catch(err=>{
+
+		});
+	};
+}
+
+export function fetchPerformanceIfNeeded(){
+	return (dispatch,getState) => {
+		const state = getState();
+		if(!state.isFetchingPerformance && !state.performance){
+			return dispatch(fetchPerformance());
+		}
+	}
+}
+
+const requestMedianData = () => ({
+	type: REQUEST_MEDIAN_DATA,
+});
+
+const responseMedianData = (data) => ({
+	type: RESPONSE_MEDIAN_DATA,
+	median_data: data,
+})
+
+function fetchMedianData(){
+	return dispatch => {
+		dispatch(requestMedianData());
+		get("/api/medians")
+		.then((response)=>{
+			dispatch(responseMedianData(response.data.median_data));
+		})
+		.catch(err=>{
+
+		});
+	};
+}
+
+export function fetchMediansIfNeeded(){
+	return (dispatch,getState) => {
+		const state = getState();
+		if(!state.isFetchingMedians && !state.median_data)
+			return dispatch(fetchMedianData());
+	}
 }

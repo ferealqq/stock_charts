@@ -135,8 +135,41 @@ function calculateMedian(values){
 function listOfValues(list,valueName){
 	return _.map(list,(object)=>object[valueName]);
 }
+function revenueStats(quarter){
+	return {
+		totalRevenue: listOfValues(quarter,"totalRevenue"),
+		operatingRevenue: listOfValues(quarter,"operatingRevenue"),	
+		costOfRevenue: listOfValues(quarter,"costOfRevenue"),	
+	};
+}
+function calculateChangeMedian(stat1,stat2,changeName){
+	let changeList = [];
+	_.map(stat1,(obj,index)=>{
+		let compare = _.find(stat2,{symbol: obj.symbol});
+		if(compare && compare[changeName] && obj[changeName]){
+			changeList.push(compare[changeName]/obj[changeName]);
+		}
+	});
+	return calculateMedian(changeList); 
+}
+function calculateRevenueStats(quarters){
+	return {
+		q2TotalRevenuGrowth: calculateChangeMedian(quarters.q1,quarters.q2,"totalRevenue"),
+		q2operatingRevenueGrowth: calculateChangeMedian(quarters.q1,quarters.q2,"operatingRevenue"),
+		q2costOfRevenueGrowth: calculateChangeMedian(quarters.q1,quarters.q2,"costOfRevenue"),
+		
+		q3TotalRevenuGrowth: calculateChangeMedian(quarters.q2,quarters.q3,"totalRevenue"),
+		q3operatingRevenueGrowth: calculateChangeMedian(quarters.q2,quarters.q3,"operatingRevenue"),
+		q3costOfRevenueGrowth: calculateChangeMedian(quarters.q2,quarters.q3,"costOfRevenue"),
+		
+		q4TotalRevenuGrowth: calculateChangeMedian(quarters.q3,quarters.q4,"totalRevenue"),
+		q4operatingRevenueGrowth: calculateChangeMedian(quarters.q3,quarters.q4,"operatingRevenue"),
+		q4costOfRevenueGrowth: calculateChangeMedian(quarters.q3,quarters.q4,"costOfRevenue"),				
+	};
+}
 function getMedians(data){
 	const quarters = sortToQuarters(data);
+	const quartersRevenueStats = calculateRevenueStats(quarters);
 	return {
 		q1: {
 			profitMargin: calculateMedian(listOfValues(quarters.q1,"profitMargin")),
@@ -146,17 +179,26 @@ function getMedians(data){
 		q2: {
 			profitMargin: calculateMedian(listOfValues(quarters.q2,"profitMargin")),
 			debt_equityRatio: calculateMedian(listOfValues(quarters.q2,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q2,"equityPercent"))
+			equityPercent: calculateMedian(listOfValues(quarters.q2,"equityPercent")),
+			totalRevenueGrowth: quartersRevenueStats.q2TotalRevenuGrowth,
+			operatingRevenueGrowth: quartersRevenueStats.q2operatingRevenueGrowth,
+			costOfRevenueGrowth: quartersRevenueStats.q2costOfRevenueGrowth,
 		},
 		q3: {
 			profitMargin: calculateMedian(listOfValues(quarters.q3,"profitMargin")),
 			debt_equityRatio: calculateMedian(listOfValues(quarters.q3,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q3,"equityPercent"))
+			equityPercent: calculateMedian(listOfValues(quarters.q3,"equityPercent")),
+			totalRevenueGrowth: quartersRevenueStats.q3TotalRevenuGrowth,
+			operatingRevenueGrowth: quartersRevenueStats.q3operatingRevenueGrowth,
+			costOfRevenueGrowth: quartersRevenueStats.q3costOfRevenueGrowth,			
 		},
 		q4: {
 			profitMargin: calculateMedian(listOfValues(quarters.q4,"profitMargin")),
 			debt_equityRatio: calculateMedian(listOfValues(quarters.q4,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q4,"equityPercent"))
+			equityPercent: calculateMedian(listOfValues(quarters.q4,"equityPercent")),
+			totalRevenueGrowth: quartersRevenueStats.q4TotalRevenuGrowth,
+			operatingRevenueGrowth: quartersRevenueStats.q4operatingRevenueGrowth,
+			costOfRevenueGrowth: quartersRevenueStats.q4costOfRevenueGrowth,			
 		},
 	};
 }		
@@ -178,10 +220,12 @@ module.exports = {
 
 				return current; 
 			});
-			return {
-				data: sorted,
-				median_data: getMedians(data),
-			};
+			return sorted;
 		});
 	},
+	getMedians: ()=>{
+		return Financials.findAll().then((data)=>
+			getMedians(data)
+		);
+	}
 }

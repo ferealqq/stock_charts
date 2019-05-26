@@ -11,7 +11,7 @@ export class TopBanner extends Component {
 			<div className="w-90 m-auto">
 				<Navbar expand="md">
 					<NavbarBrand className="no-default">
-						<Link to="/" className="no-default"> Finance Industry Data US </Link> 
+						<Link to="/" className="no-default title"> Finance Industry Data US </Link> 
 					</NavbarBrand>
 					
 					<NavbarToggler onClick={()=>this.setState({open: !this.state.open})} />
