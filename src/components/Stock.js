@@ -25,7 +25,7 @@ class Stock extends Component {
 						<QuartersDebtEquityRatio data={data ? data [symbol] : undefined} median_data={median_data} />
 					</ListGroup>
 
-					<ListGroup className="pt-4">
+					<ListGroup>
 						<Listheaders headers={["Equity Percent","Median","Report Date"]} />
 						<QuartersEquityPercent data={data ? data [symbol] : undefined} median_data={median_data} />
 					</ListGroup>
