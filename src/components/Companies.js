@@ -7,7 +7,7 @@ import {
     Collapse,NavbarToggler,Navbar
 } from 'reactstrap';
 import { map } from 'lodash';
-import { fetchDataIfNeeded } from './redux/dataActions';
+import { fetchDataIfNeeded,fetchMediansIfNeeded } from './redux/dataActions';
 import { withRouter,Link } from 'react-router-dom';
 import { connect } from 'react-redux'; 
 
@@ -21,6 +21,7 @@ class App extends Component {
     }
     componentDidMount(){
         this.props.fetchDataIfNeeded();
+        this.props.fetchMediansIfNeeded();
     }
     toggle(){
         this.setState({
@@ -29,7 +30,7 @@ class App extends Component {
     }
     render() {
         return (
-            <Container className="App" fluid>
+            <Container className="App py-3" fluid>
                 <Container>
                     <Row>
                         <h3> Companies </h3>
@@ -67,6 +68,7 @@ const LinkList = (props) => (
 
 const mapDispatchToProps = (dispatch) => ({
     fetchDataIfNeeded: () => dispatch(fetchDataIfNeeded()),
+    fetchMediansIfNeeded: () => dispatch(fetchMediansIfNeeded())
 });
 
 const mapStateToProps = (state) => ({

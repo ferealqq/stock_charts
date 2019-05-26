@@ -97,7 +97,6 @@ function calculateStatsQuarter(quarter){
 		if(obj && obj.totalAssets && obj.shareholderEquity)
 			equityPercents.push(calculateEquityPercent(obj))
 	})
-	console.log(profitMargins);
 	return {
 		profitMargin: calculateMedian(profitMargins),
 		debt_equityRatio: calculateMedian(debt_equityRatios),

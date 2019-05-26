@@ -43,6 +43,7 @@ class App extends Component {
                         }
                         <p> Last updated: {new Date(performanceLastUpdated||"").toLocaleDateString('en-US')} </p>
                     </Row>
+
                     <ListGroup className="black">
                         <ListQuarters />
                         <ListValues median_data={median_data}/>
@@ -53,7 +54,7 @@ class App extends Component {
     }
 }
 
-const ListQuarters = (props) => (
+export const ListQuarters = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -77,22 +78,22 @@ const ListQuarters = (props) => (
 
 const ListValues = (props) => (
     <React.Fragment>
-        <ProfitMarginList {...props}/>
-        <DebtEquityList {...props}/>
-        <EquityPercentList {...props} />
-        <TRGList {...props} />
-        <ORGList {...props} />
-        <CORList {...props} />
+        <MedianProfitMarginList {...props}/>
+        <MedianDebtEquityList {...props}/>
+        <MedianEquityPercentList {...props} />
+        <MedianTRGList {...props} />
+        <MedianORGList {...props} />
+        <MedianCORList {...props} />
     </React.Fragment>
 );
 
-const ProfitMarginList = (props) => (
+export const MedianProfitMarginList = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
                 Profit Margin Median
             </Col>
-            {
+            {  
                 map(props.median_data,(obj)=>
                     <Col>
                         {Math.round(obj.profitMargin*100)}%
@@ -103,7 +104,7 @@ const ProfitMarginList = (props) => (
     </ListGroupItem>
 );
 
-const DebtEquityList = (props) => (
+export const MedianDebtEquityList = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -120,7 +121,7 @@ const DebtEquityList = (props) => (
     </ListGroupItem> 
 );
 
-const EquityPercentList = (props) => (
+export const MedianEquityPercentList = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -137,7 +138,7 @@ const EquityPercentList = (props) => (
     </ListGroupItem> 
 );
 
-const TRGList = (props) => (
+export const MedianTRGList = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -154,7 +155,7 @@ const TRGList = (props) => (
     </ListGroupItem> 
 );
 
-const ORGList = (props) => (
+export const MedianORGList = (props) => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -171,7 +172,7 @@ const ORGList = (props) => (
     </ListGroupItem>     
 );
 
-const CORList = props => (
+export const MedianCORList = props => (
     <ListGroupItem>
         <Row>
             <Col>
@@ -188,7 +189,7 @@ const CORList = props => (
     </ListGroupItem> 
 );
 
-function toPercent(value){
+export function toPercent(value){
     if(!value)
         return;
     else if(value > 1)
