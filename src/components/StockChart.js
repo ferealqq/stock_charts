@@ -131,7 +131,6 @@ class StockChart extends Component {
     this.state = {
       lowest: getLowest("week",data),
       highest: getHighest("week",data),
-      symbol: 'TSLA',
     };
     this.fetchData = this.fetchData.bind(this);
   }
@@ -139,7 +138,7 @@ class StockChart extends Component {
     this.fetchData();
   }
   fetchData(){
-    get(`https://www.worldtradingdata.com/api/v1/history?symbol=${this.state.symbol}&sort=newest&api_token=8JaA8FG34X8VnIqCw3ggb3wXCRWBvSkgC1yWHZy8mDyoDLzqxwQGwGogUwLI`)
+    get(`https://www.worldtradingdata.com/api/v1/history?symbol=${this.props.symbol}&sort=newest&api_token=8JaA8FG34X8VnIqCw3ggb3wXCRWBvSkgC1yWHZy8mDyoDLzqxwQGwGogUwLI`)
       .then((res)=>{
         let last = getLast('month',res.data.history);
         this.setState({
@@ -148,6 +147,11 @@ class StockChart extends Component {
           highest: getHighest(last),
         });
       })    
+  }
+  shouldComponentUpdate(nextProps){
+    if(this.props.symbol !== nextProps.symbol)
+      this.fetchData();
+    return true;
   }
   selectedStock(stockName){
     this.setState({
@@ -160,7 +164,6 @@ class StockChart extends Component {
     return (
       <div className="App">
         <header className="App-header">
-        <SearchField selectedStock={this.selectedStock} />
         <LineChart width={900} height={600} data={reverse(realData)}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
