@@ -18,7 +18,7 @@ export class TopBanner extends Component {
 					<Collapse isOpen={this.state.open} navbar>
 						<Nav className="ml-auto" navbar>
 							<NavItem>
-								<Link to="/companies">
+								<Link to="/companies" className="subtitle">
 									Companies
 								</Link>
 							</NavItem>

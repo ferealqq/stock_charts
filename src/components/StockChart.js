@@ -148,6 +148,10 @@ class StockChart extends Component {
         });
       })    
   }
+  componentDidUpdate(prevProps){
+    if(this.props.symbol !== prevProps.symbol)
+      this.fetchData();
+  }
   shouldComponentUpdate(nextProps){
     if(this.props.symbol !== nextProps.symbol)
       this.fetchData();

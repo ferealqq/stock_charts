@@ -94,8 +94,8 @@ export const MedianProfitMarginList = (props) => (
                 Profit Margin Median
             </Col>
             {  
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         {Math.round(obj.profitMargin*100)}%
                     </Col>
                 )
@@ -111,8 +111,8 @@ export const MedianDebtEquityList = (props) => (
                 Debt/Equity Ratio Median
             </Col>
             {
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         { toNumber(obj.debt_equityRatio).toFixed(2)}
                     </Col>
                 )
@@ -128,8 +128,8 @@ export const MedianEquityPercentList = (props) => (
                 Equity Percent Median
             </Col>
             {
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         { Math.round(obj.equityPercent*100) }%
                     </Col>
                 )
@@ -145,8 +145,8 @@ export const MedianTRGList = (props) => (
                 Total Revenue Growth Median
             </Col>
             {
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         { toPercent(obj.totalRevenueGrowth)}
                     </Col>
                 )
@@ -162,8 +162,8 @@ export const MedianORGList = (props) => (
                 Operating Revenue Growth Median
             </Col>
             {
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         { toPercent(obj.operatingRevenueGrowth)}
                     </Col>
                 )
@@ -179,8 +179,8 @@ export const MedianCORList = props => (
                 Cost Of Revenue Growth Median
             </Col>
             {
-                map(props.median_data,(obj)=>
-                    <Col>
+                map(props.median_data,(obj,index)=>
+                    <Col key={index}>
                         { toPercent(obj.costOfRevenueGrowth)}
                     </Col>
                 )
