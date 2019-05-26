@@ -1,109 +1,20 @@
 const Sequelize = require('sequelize');
 const Model = Sequelize.Model;
 const _ = require('lodash');
-const { closestIndexTo } = require('date-fns');
-const sequelize = new Sequelize('finance_financials','this','',{
-	host: "localhost",
-	dialect: 'mysql',
+const { closestIndexTo,parseISO } = require('date-fns');
+const { dataStructure } = require('./structure.js');
+
+const tableName = "data";
+const sequelize = new Sequelize({
+	dialect: 'sqlite',
+	storage: __dirname+'/data.db',
 });
 
 
-const financialStructureMysql = {
-	id:{
-		type: Sequelize.INTEGER,
-		primaryKey: true,
-		autoIncrement: true,
-	},
-	symbol: {
-		type: Sequelize.STRING,
-		allowNull: false,
-		unique: 'compositeIndex',
-		autoIncrement: false,
-	},	
-	reportDate: {
-		type: Sequelize.STRING,
-		allowNull: false,
-		unique: 'compositeIndex',
-		autoIncrement: false,
-	},	
-	grossProfit: {
-		type: Sequelize.INTEGER,
-	},
-	costOfRevenue: {
-		type: Sequelize.INTEGER,
-	},
-	operatingRevenue: {
-		type: Sequelize.INTEGER,
-	},	
-	totalRevenue: {
-		type: Sequelize.INTEGER,
-	},
-	operatingIncome: {
-		type: Sequelize.INTEGER,
-	},	
-	netIncome: {
-		type: Sequelize.INTEGER,
-	},
-	profitMargin: {
-		type: Sequelize.INTEGER,
-	},
-	researchAndDevelopment:{
-		type: Sequelize.INTEGER,
-	},
-	operatingExpense:{
-		type: Sequelize.INTEGER,
-	},
-	currentAssets:{
-		type: Sequelize.INTEGER,
-	},
-	totalAssets:{
-		type: Sequelize.INTEGER,
-	},
-	totalLiabilities:{
-		type: Sequelize.INTEGER,
-	},
-	currentCash:{
-		type: Sequelize.INTEGER,
-	},
-	currentDebt:{
-		type: Sequelize.INTEGER,
-	},
-	shortTermDebt:{
-		type: Sequelize.INTEGER,
-	},
-	longTermDebt:{
-		type: Sequelize.INTEGER,
-	},
-	totalCash:{
-		type: Sequelize.INTEGER,
-	},
-	totalDebt:{
-		type: Sequelize.INTEGER,
-	},
-	shareholderEquity:{
-		type: Sequelize.INTEGER,
-	},
-	cashChange:{
-		type: Sequelize.INTEGER,
-	},
-	cashFlow:{
-		type: Sequelize.INTEGER,
-	},
-	operatingGainsLosses:{
-		type: Sequelize.INTEGER,
-	},
-	debt_equityRatio: {
-		type: Sequelize.FLOAT,
-	},
-    equityPercent:{
-    	type: Sequelize.FLOAT,
-    },
-};
-
 class Financials extends Model{}
-Financials.init(financialStructureMysql,{
+Financials.init(dataStructure,{
 	sequelize,
-	modelName: 'finance_industry_us',
+	modelName: tableName,
 	timestamps: false,
 })
 
@@ -117,7 +28,7 @@ function sortToQuarters(data){
 	let quarterDates = [new Date(2018,3),new Date(2018,6),new Date(2018,9),new Date(2018,12)];
 	let keys = Object.keys(quarters);
 	_.map(data,(object)=>{
-		let closest = closestIndexTo(object.reportDate,quarterDates);
+		let closest = closestIndexTo(parseISO(object.reportDate),quarterDates);
 		quarters[keys[closest]].push(object)
 	});
 	return quarters;	
@@ -167,35 +78,70 @@ function calculateRevenueStats(quarters){
 		q4costOfRevenueGrowth: calculateChangeMedian(quarters.q3,quarters.q4,"costOfRevenue"),				
 	};
 }
+function calculateProfitMargin({netIncome, totalRevenue}){
+	return _.toNumber(netIncome)/_.toNumber(totalRevenue);
+}
+function calculateDebtEquityRatio({shareholderEquity,totalLiabilities}){
+	return _.toNumber(totalLiabilities)/_.toNumber(shareholderEquity);
+}
+function calculateEquityPercent({shareholderEquity,totalAssets}){
+	return _.toNumber(shareholderEquity)/_.toNumber(totalAssets);
+}
+function calculateStatsQuarter(quarter){
+	let profitMargins = [], debt_equityRatios = [], equityPercents = [];
+	_.map(quarter,(obj)=>{
+		if(obj && obj.netIncome && obj.totalRevenue)
+			profitMargins.push(calculateProfitMargin(obj));
+		if(obj && obj.shareholderEquity && obj.totalLiabilities)
+			debt_equityRatios.push(calculateDebtEquityRatio(obj))
+		if(obj && obj.totalAssets && obj.shareholderEquity)
+			equityPercents.push(calculateEquityPercent(obj))
+	})
+	console.log(profitMargins);
+	return {
+		profitMargin: calculateMedian(profitMargins),
+		debt_equityRatio: calculateMedian(debt_equityRatios),
+		equityPercent: calculateMedian(equityPercents),
+	}
+}
+function calculateStatMedians(quarters){
+	return {
+		q1: calculateStatsQuarter(quarters.q1),
+		q2: calculateStatsQuarter(quarters.q2),
+		q3: calculateStatsQuarter(quarters.q3),
+		q4: calculateStatsQuarter(quarters.q4),
+	}	
+}
 function getMedians(data){
 	const quarters = sortToQuarters(data);
 	const quartersRevenueStats = calculateRevenueStats(quarters);
+	const stats = calculateStatMedians(quarters);
 	return {
 		q1: {
-			profitMargin: calculateMedian(listOfValues(quarters.q1,"profitMargin")),
-			debt_equityRatio: calculateMedian(listOfValues(quarters.q1,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q1,"equityPercent"))
+			profitMargin: stats.q1.profitMargin,
+			debt_equityRatio: stats.q1.debt_equityRatio,
+			equityPercent: stats.q1.equityPercent,
 		},
 		q2: {
-			profitMargin: calculateMedian(listOfValues(quarters.q2,"profitMargin")),
-			debt_equityRatio: calculateMedian(listOfValues(quarters.q2,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q2,"equityPercent")),
+			profitMargin: stats.q2.profitMargin,
+			debt_equityRatio: stats.q2.debt_equityRatio,
+			equityPercent: stats.q2.equityPercent,
 			totalRevenueGrowth: quartersRevenueStats.q2TotalRevenuGrowth,
 			operatingRevenueGrowth: quartersRevenueStats.q2operatingRevenueGrowth,
 			costOfRevenueGrowth: quartersRevenueStats.q2costOfRevenueGrowth,
 		},
 		q3: {
-			profitMargin: calculateMedian(listOfValues(quarters.q3,"profitMargin")),
-			debt_equityRatio: calculateMedian(listOfValues(quarters.q3,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q3,"equityPercent")),
+			profitMargin: stats.q3.profitMargin,
+			debt_equityRatio: stats.q3.debt_equityRatio,
+			equityPercent: stats.q3.equityPercent,
 			totalRevenueGrowth: quartersRevenueStats.q3TotalRevenuGrowth,
 			operatingRevenueGrowth: quartersRevenueStats.q3operatingRevenueGrowth,
 			costOfRevenueGrowth: quartersRevenueStats.q3costOfRevenueGrowth,			
 		},
 		q4: {
-			profitMargin: calculateMedian(listOfValues(quarters.q4,"profitMargin")),
-			debt_equityRatio: calculateMedian(listOfValues(quarters.q4,"debt_equityRatio")),
-			equityPercent: calculateMedian(listOfValues(quarters.q4,"equityPercent")),
+			profitMargin: stats.q4.profitMargin,
+			debt_equityRatio: stats.q4.debt_equityRatio,
+			equityPercent: stats.q4.equityPercent,
 			totalRevenueGrowth: quartersRevenueStats.q4TotalRevenuGrowth,
 			operatingRevenueGrowth: quartersRevenueStats.q4operatingRevenueGrowth,
 			costOfRevenueGrowth: quartersRevenueStats.q4costOfRevenueGrowth,			
