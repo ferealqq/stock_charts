@@ -137,8 +137,6 @@ function listOfValues(list,valueName){
 }
 function getMedians(data){
 	const quarters = sortToQuarters(data);
-	console.log(quarters.q1[0]);
-	console.log(calculateMedian(listOfValues(quarters.q1,"profitMargin")));
 	return {
 		q1: {
 			profitMargin: calculateMedian(listOfValues(quarters.q1,"profitMargin")),

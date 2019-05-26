@@ -16,17 +16,17 @@ class Stock extends Component {
 			return (
 				<Container>
 					<ListGroup>
-						<Listheaders headers={["Net Income", "Profit Margin", "Median(Profit Margin)", "Report Date"]} />
+						<Listheaders headers={["Net Income", "Profit Margin", "Median(Profit Margin)", "Quarter"]} />
 						<QuartersProfit data={data ? data[symbol] : undefined} median_data={median_data} />
 					</ListGroup>
 
 					<ListGroup className="py-4">
-						<Listheaders headers={["Debt to equity ratio","Median","Report Date"]} />
+						<Listheaders headers={["Debt to equity ratio","Median","Quarter"]} />
 						<QuartersDebtEquityRatio data={data ? data [symbol] : undefined} median_data={median_data} />
 					</ListGroup>
 
 					<ListGroup>
-						<Listheaders headers={["Equity Percent","Median","Report Date"]} />
+						<Listheaders headers={["Equity Percent","Median","Quarter"]} />
 						<QuartersEquityPercent data={data ? data [symbol] : undefined} median_data={median_data} />
 					</ListGroup>
 
@@ -58,7 +58,7 @@ const QuartersProfit = (props) => (
 	<React.Fragment>
 		{
 			map(props.data,(obj,index)=>
-				<ListProfitQuarter data={obj} key={index} 
+				<ListProfitQuarter data={obj} key={index} quarterNumber={index}
 					median={props.median_data ? Object.values(props.median_data)[index].profitMargin : undefined} />
 			)
 		}
@@ -78,7 +78,7 @@ const ListProfitQuarter = (props) => (
 				{Math.round(props.median*100)}%
 			</Col>
 			<Col className="p-0" sm="3">
-				{props.data.reportDate}
+				Q{props.quarterNumber+1}
 			</Col>
 		</Row>		
 	</ListGroupItem>
@@ -88,7 +88,7 @@ const QuartersDebtEquityRatio = (props) => (
 	<React.Fragment>
 		{
 			map(props.data,(obj,index)=>
-				<ListDebtEquityRatioQuarter data={obj} key={index} 
+				<ListDebtEquityRatioQuarter data={obj} key={index} quarterNumber={index}
 					median={props.median_data ? Object.values(props.median_data)[index].debt_equityRatio : undefined} />				
 			)
 		}
@@ -105,7 +105,7 @@ const ListDebtEquityRatioQuarter = (props) => (
 				{toNumber(props.median).toFixed(1)}
 			</Col>
 			<Col className="p-0" sm="3">
-				{props.data.reportDate}
+				Q{props.quarterNumber+1}
 			</Col>
 		</Row>		
 	</ListGroupItem>
@@ -115,7 +115,7 @@ const QuartersEquityPercent = (props) => (
 	<React.Fragment>
 		{
 			map(props.data,(obj,index)=>
-				<ListEquityPercentQuarter data={obj} key={index} 
+				<ListEquityPercentQuarter data={obj} key={index} quarterNumber={index}
 					median={props.median_data ? Object.values(props.median_data)[index].equityPercent : undefined} />
 			)
 		}
@@ -132,7 +132,7 @@ const ListEquityPercentQuarter = (props) => (
 				{Math.round(props.median*100)}%
 			</Col>
 			<Col className="p-0" sm="3">
-				{props.data.reportDate}
+				Q{props.quarterNumber+1}
 			</Col>
 		</Row>		
 	</ListGroupItem>	

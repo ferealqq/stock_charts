@@ -29,10 +29,21 @@ class App extends Component {
     }
     render() {
         return (
-            <Container className="App py-3" fluid>
+            <Container className="App" fluid>
                 <Container>
-                    
+                    <Row>
+                        <h3> Companies </h3>
+                    </Row>
+                    <Navbar expand="md">
+                        <NavbarToggler onClick={this.toggle} />
+                        <Collapse isOpen={this.state.isOpen} navbar>                    
+                            <Nav>
+                                <LinkList data={this.props.data ? Object.keys(this.props.data) : null}/>
+                            </Nav>
+                        </Collapse>
+                    </Navbar>
                 </Container>
+                { this.props.children }
             </Container>
         );
     }
